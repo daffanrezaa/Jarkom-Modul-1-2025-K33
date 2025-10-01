@@ -1,0 +1,2 @@
+# setting NAT1, Eru (router), 1 switch ke client Melkor dan Manwe, 1 switch ke Varda dan Ulmo. 
+# Hubungkan Eru ke 'NAT1, Eru ke Switch 1 dan 2. Hubungkan Switch 1 ke Melkor dan Manwe, dan hubungkan Switch 2 ke Varda dan Ulmo
