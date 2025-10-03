@@ -305,11 +305,98 @@ Kemudian kita dapat melakukan `follow tcp stream` pada packet tersebut dan menda
 
 ### 15. Melkor menyusup ke ruang server dan memasang keyboard USB berbahaya pada node Manwe. Buka file capture dan identifikasi pesan atau ketikan (keystrokes) yang berhasil dicuri oleh Melkor untuk menemukan password rahasia. (link file) nc 10.15.43.32 3402
 
+Berikut adalah flag untuk soal 15
 <img width="1853" height="723" alt="Image" src="https://github.com/user-attachments/assets/7988787b-f9c3-4963-b674-ec1ab053256d" />
 
+Untuk jawaban pertanyaan pertama adalah Keyboard, karena keyboard sendiri merupakan salah satu Human Interface Device (HID) dan HID sendiri adalah protokol USB standar untuk input device. Jadi setiap penekanan tombol keyboard akan dikirimkan sebagai paket HID di USB. Selain itu saya juga menelusuri beberapa packet awal dan menemukan Interface protokol yang digunakan pada packet nomor enam adalah Keyboard.
 <img width="2879" height="1443" alt="Image" src="https://github.com/user-attachments/assets/110ba7fa-9ca8-49f0-a2ac-10ecb51bed56" />
 
+Kemudian untuk menjawab pertanyaan kedua, terlebih dahulu kita harus memfilter mana packet yang berisi data. Jadi kita bisa menggunakan `usbhid.data` untuk mengetahui packet mana yang kemungkinan berisi data yang diketik oleh Melkor.
+<img width="2878" height="1554" alt="Image" src="https://github.com/user-attachments/assets/dae2d9c9-311b-4c9e-b2ba-579eb0112d34" />
+
+Setelah mengetahui semua packet yang kemungkinan berisi data yang diketik kita dapat menggunakan kode di bawah ini untuk mengexport ke linux agar nantinya bisa menerjemahkan ke format base64.
+```bash
+tshark -r hiddenmsg.pcapng -Y "usbhid.data" -T fields -e usbhid.data > hid_data.txt
+```
+- `tshark -r hiddenmsg.pcapng`: Memerintahkan tshark untuk membaca (-r) file hiddenmsg.pcapng.
+
+- `Y "usbhid.data"`: Menerapkan display filter untuk hanya memproses paket yang berisi data HID.
+
+- `T fields -e usbhid.data`: Mengatur format output (-T fields) dan memerintahkan untuk mengekstrak (-e) hanya isi dari field usbhid.data.
+
+- `> hid_data.txt`: Menyimpan semua hasil ekstraksi ke dalam sebuah file baru bernama hid_data.txt.
+
+Nah selanjutnya setelah seluruh data berhasil di export, kemudian kita haru merubah format seluruh data bilangan tersebut ke format base64 agar kita mengetahui pesan apa yang ditulis nantinya. Di sini saya menggunakan script untuk melakukan formating ini.
+```bash
+NAMA_FILE_INPUT = 'hid_dataa.txt'
+
+# Kode Heksadesimal USB HID ke Karakter Keyboard Layout
+scancodes = {
+    0x04: "a", 0x05: "b", 0x06: "c", 0x07: "d", 0x08: "e", 0x09: "f",
+    0x0a: "g", 0x0b: "h", 0x0c: "i", 0x0d: "j", 0x0e: "k", 0x0f: "l",
+    0x10: "m", 0x11: "n", 0x12: "o", 0x13: "p", 0x14: "q", 0x15: "r",
+    0x16: "s", 0x17: "t", 0x18: "u", 0x19: "v", 0x1a: "w", 0x1b: "x",
+    0x1c: "y", 0x1d: "z", 0x1e: "1", 0x1f: "2", 0x20: "3", 0x21: "4",
+    0x22: "5", 0x23: "6", 0x24: "7", 0x25: "8", 0x26: "9", 0x27: "0",
+    0x28: "<ENTER>", 0x2a: "<BS>", 0x2c: " ", 0x2d: "-", 0x2e: "=",
+    0x2f: "[", 0x30: "]", 0x31: "\\", 0x33: ";", 0x34: "'", 0x36: ",",
+    0x37: ".", 0x38: "/"
+}
+
+# tombol yang ditekan bersama SHIFT
+shifted_scancodes = {
+    0x1e: "!", 0x1f: "@", 0x20: "#", 0x21: "$", 0x22: "%", 0x23: "^",
+    0x24: "&", 0x25: "*", 0x26: "(", 0x27: ")", 0x2d: "_", 0x2e: "+",
+    0x2f: "{", 0x30: "}", 0x31: "|", 0x33: ":", 0x34: "\"", 0x36: "<",
+    0x37: ">", 0x38: "?"
+}
+
+# membuka dan membaca file secara aman dan menyimpannya sebagai daftar(list)
+try:
+
+    with open(NAMA_FILE_INPUT, 'r') as f:
+        lines = f.readlines()
+
+except FileNotFoundError:
+    print(f"Error: File '{NAMA_FILE_INPUT}' tidak ditemukan. Pastikan nama filenya benar.")
+    exit()
+
+# Loop penerjemah setiap baris
+result = ""
+last_keycode = 0
+
+for line in lines:
+    data = line.strip().replace(':', '')
+    if len(data) != 16:
+        continue
+
+    modifier = int(data[0:2], 16)
+    keycode = int(data[4:6], 16)
+
+    if keycode != 0 and keycode != last_keycode:
+        is_shift_pressed = (modifier == 0x02 or modifier == 0x20)
+
+        if is_shift_pressed:
+            if keycode in shifted_scancodes:
+                result += shifted_scancodes[keycode]
+            elif keycode in scancodes:
+                result += scancodes[keycode].upper()
+        else:
+            if keycode in scancodes:
+                result += scancodes[keycode]
+
+    last_keycode = keycode
+
+print("String Base64 yang berhasil diekstrak:")
+print(result)
+```
+- `modifier`: Mengambil dua karakter pertama (02), menganggapnya sebagai angka heksadesimal (16), dan menyimpannya. Ini adalah kode untuk tombol modifier (Shift, Ctrl, Alt).
+
+- `keycode`: Mengambil karakter ke-5 dan ke-6 (18), menganggapnya sebagai angka heksadesimal, dan menyimpannya. Ini adalah kode untuk tombol utama yang ditekan.
+
+Kemudian kita dapat menjalankan langsung script di atas dan mendapatkan hasil base64 seperti di bawah ini. Dan untuk pertanyaan nomor tiga kita dapat menerjemahkan dari base64 ke pesan biasa menggunakan tools online di google.
 <img width="1336" height="182" alt="Image" src="https://github.com/user-attachments/assets/3f86ec50-710b-4931-af9a-91edec715e1a" />
+
 
 ### 16. Melkor semakin murka ia meletakkan file berbahaya di server milik Manwe. Dari file capture yang ada, identifikasi file apa yang diletakkan oleh Melkor. (link file) nc 10.15.43.32 3403
 
@@ -335,35 +422,42 @@ Kemudian kita dapat melakukan `follow tcp stream` pada packet tersebut dan menda
 
 ### 17. Manwe membuat halaman web di node-nya yang menampilkan gambar cincin agung. Melkor yang melihat web tersebut merasa iri sehingga ia meletakkan file berbahaya agar web tersebut dapat dianggap menyebarkan malware oleh Eru. Analisis file capture untuk menggagalkan rencana Melkor dan menyelamatkan web Manwe. (link file) nc 10.15.43.32 3404
 
+Berikut adalah hasil flag dari soal nomor 17
 <img width="1884" height="617" alt="Image" src="https://github.com/user-attachments/assets/01d051f5-71e0-4f61-9eca-dffe65a95114" />
 
-<img width="2879" height="1435" alt="Image" src="https://github.com/user-attachments/assets/ee952b0d-c4cb-4f3f-98e9-b47b4e41eb5b" />
-
-<img width="2296" height="722" alt="Image" src="https://github.com/user-attachments/assets/52fd2cbc-e77a-420e-8350-5ed3859b3f7f" />
-
+Untuk menjawab pertanyaan pertama tentang file yang mencurigakan saya di sini langsung menggunakan filter http untuk melihat data data dari seluruh protokol http yang ada karena pada soal diberitahu bahwa file tersebut diletakkan di web yang digunakan Manwe jadi kemungkinan besar file tersebut ada di protokol http seperti gambar di bawah ini.
 <img width="2877" height="290" alt="Image" src="https://github.com/user-attachments/assets/3bd6b7c1-31ac-46d2-bf48-5a7d0ce4eb5d" />
 
+Untuk memperjelas hasil di atas kita dapat menggunakan fungsi wireshark yaitu `export object` jadi nantinya ini akan memfilter objek objek yang bisa di export seperti gambar di bawah ini. Nah setelah kita mengetahui object object tersebut kita dapat mencoba memasukkan setiap file di atas ke dalam soal. Jadi gambar di bawah ini langsung menunjukkan jawaban dari pertanyaan satu dan dua.
 <img width="2840" height="737" alt="Image" src="https://github.com/user-attachments/assets/fd5ba70f-9ace-477d-8756-655215be1170" />
 
+Nah nuntuk pertanyaan ketiga terkait dengan hash dari file kedua, karena kita sudah diberitahu formatnya kita dapat langsung mengexport file kedua tersebut ke dalam linux yang kita gunakan. Kemudian dengan fitur yang sudah tersedia di linux kita dapat langsung menggunakan `sha256sum` untuk melakukan hash ke format tersebut.
 ![Image](https://github.com/user-attachments/assets/10ab3949-6383-4542-a66c-68b0f19a507f)
 
 ### 18. Karena rencana Melkor yang terus gagal, ia akhirnya berhenti sejenak untuk berpikir. Pada saat berpikir ia akhirnya memutuskan untuk membuat rencana jahat lainnya dengan meletakkan file berbahaya lagi tetapi dengan metode yang berbeda. Gagalkan lagi rencana Melkor dengan mengidentifikasi file capture yang disediakan agar dunia tetap aman. (link file) nc 10.15.43.32 3405
 
+Berikut adalah flag dari soal nomor 18
 <img width="2059" height="1043" alt="Image" src="https://github.com/user-attachments/assets/ffb2a43a-c07e-4619-bac9-1628f8eefce2" />
 
-<img width="2879" height="335" alt="Image" src="https://github.com/user-attachments/assets/fd1ddf91-d3ec-482f-8d4c-0360065adefe" />
+Untun menjawab pertanyaan pertama di sini saya langsung melakukan `frame contains ".exe", karena seperti soal soal sebelumnya kebanyakan file yang sering digunakan untuk menyusupkan malware adalah file dengan format tersebut, karena file tersebut cenderung mudah untuk dieksekusi dan mudah untuk di distribusikan. Dan terbukti dari hasil filter tersebut langsung menghasilkan dua file yang terlihat mencurigakan, jadi saya langsung memasukkan dua file tersebut sebagai jawaban pertanyaan nomor satu dua dan tiga.
+<img width="2879" height="1435" alt="Image" src="https://github.com/user-attachments/assets/ee952b0d-c4cb-4f3f-98e9-b47b4e41eb5b" />
 
+Nah untuk dua pertanyaan terakhir  di sini kita dapat melakukan cara yang sama seperti soal yang sebelumnya, yaitu mengexport objek terlebih dahulu ke linux kemudian barulah melakukan hash dengan format sha256 pada linux.
 ![Image](https://github.com/user-attachments/assets/c6cc6b64-5f8e-492a-9efe-12d7b2923612)
 
 ### 19. Manwe mengirimkan email berisi surat cinta kepada Varda melalui koneksi yang tidak terenkripsi. Melihat hal itu Melkor sipaling jahat langsung melancarkan 
 aksinya yaitu meneror Varda dengan email yang disamarkan. Analisis file capture jaringan dan gagalkan lagi rencana busuk Melkor.  (link file) nc 10.15.43.32 3406
 
+Berikut adalah hasil flag dari soal nomor 19
 <img width="1892" height="662" alt="Image" src="https://github.com/user-attachments/assets/5871d3cd-55cd-4f44-a5a3-544d8746a0f3" />
 
+Untuk menjawab pertanyaan pertama, karena berdasarkan soal yang dibahas adalah email dan sama seperti soal nomor 14 sebelumnnya, saya disini langsung mencoba menggunakan `tcp contains "email"` untuk mencari data data dari pertanyaan nomor satu. Kemudian di sini langsung terlihat packet packet TCP yang berisi data data dengan kata kunci email. 
 <img width="2822" height="1491" alt="Image" src="https://github.com/user-attachments/assets/c9683ead-3243-4181-b5d7-626ffe226a33" />
 
+Setelah itu saya langsung menggunakan `follow tcp stream` untuk melihat isi dari packet tersebut dan benar saja di sana langsung terdapat seluruh informasi yang terkait dengan sem,ua pertanyaan di atas. dibawah ini adalah nama pengirim dari penyerang.
 <img width="1900" height="1474" alt="Image" src="https://github.com/user-attachments/assets/92d73514-29c4-4b84-97a1-9698382e458a" />
 
+Dan masih dari packet yang sama juga terlihat data data untuk menjawab pertanyaan nomor dua dan tiga.
 <img width="1868" height="1349" alt="Image" src="https://github.com/user-attachments/assets/4e908f24-67d9-437f-8109-24be8884202e" />
 
 ### 20. Untuk yang terakhir kalinya, rencana besar Melkor yaitu menanamkan sebuah file berbahaya kemudian menyembunyikannya agar tidak terlihat oleh Eru. Tetapi Manwe yang sudah merasakan adanya niat jahat dari Melkor, ia menyisipkan bantuan untuk mengungkapkan rencana Melkor. Analisis file capture dan identifikasi kegunaan bantuan yang diberikan oleh Manwe untuk menggagalkan rencana jahat Melkor selamanya. (link file) nc 10.15.43.32 3407
