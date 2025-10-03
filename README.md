@@ -288,12 +288,19 @@ hentikan capture, pakai filter ssh, klik kanan pada salah satu paket, follow, tc
 
 ### 14. Setelah gagal mengakses FTP, Melkor melancarkan serangan brute force terhadap  Manwe. Analisis file capture yang disediakan dan identifikasi upaya brute force Melkor. (link file) nc 10.15.43.32 3401
 
+Berikut adalah flag yang didapat setelah semua soal terjawab.
 <img width="1852" height="883" alt="Image" src="https://github.com/user-attachments/assets/3b594dbe-9aba-4e1c-8e8a-ba8ef913b458" />
 
+Untuk menjawab pertanyaan nomor satu, kita bisa melihat jumlah total seluruh packet yang ada di layar kanan bawah pada tampilan wireshark kita.
+<img width="1436" height="760" alt="Image" src="https://github.com/user-attachments/assets/346a0dc1-a189-4f17-8d5b-88945b755ceb" />
+
+Kemudian lanjut ke pertanyaan nomor 2, saya melakukan `follow tcp stream` pada salah satu packet dengan protokol TCP karena biasanya protokol TCP ini bertanggung jawab dalam mengelola informasi informasi tersebut. Pada gambar terbukti bahwa terdapat percobaan login yang gagal pada salah satu packet dengan protokol TCP tersebut.
 <img width="1926" height="673" alt="Image" src="https://github.com/user-attachments/assets/5363d7b9-383b-4c8d-a527-a133a1384f54" />
 
+Nah karena protokol yang digunakan adalah TCP maka kita dapat menggunakan display filter `tcp contains "successful"`, artinya filter ini akan mencari data yang berisi kata successful. Karena pada gambar di atas terdapat pesan yang menandakan gagal masuk berarti akan ada pesan yang menandakan bahwa kita berhasil masuk, maka dari itu saya mencoba menggunakan kata successful sebagai kunci untuk mencari username dan password tersebut. Setelah menjalankan terbukti bahwa hanya ada satu packet yang terdapat pesan tersebut.
 <img width="2879" height="1480" alt="Image" src="https://github.com/user-attachments/assets/71d35be6-116f-439a-9ed2-7b8124240bc8" />
 
+Kemudian kita dapat melakukan `follow tcp stream` pada packet tersebut dan mendapatkan hasil seperti gambar di bawah ini. Di sini juga langsung menjawab pertanyaan nomor 3, yaitu tools yang digunakan untuk brute force.
 <img width="1927" height="649" alt="Image" src="https://github.com/user-attachments/assets/4d14ce49-9476-4be9-bf4d-ee429eef1303" />
 
 ### 15. Melkor menyusup ke ruang server dan memasang keyboard USB berbahaya pada node Manwe. Buka file capture dan identifikasi pesan atau ketikan (keystrokes) yang berhasil dicuri oleh Melkor untuk menemukan password rahasia. (link file) nc 10.15.43.32 3402
