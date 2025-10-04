@@ -4,5 +4,6 @@ unzip traffic.zip
 
 # masuk ke dns3 app, capture manwe -> switch1 (make sure wireshark nya jalan). 
 
+chmod +x traffic.sh
 ./traffic.sh 
 #run traffic.sh di manwe, tunggu sampai proses selesai, stop wireshark, save capture, stop capture di GNS3

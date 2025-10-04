@@ -1,51 +1,21 @@
-```
-TEMPLATE /root/.bashrc
-ERU:
-apt update && apt install iptables -y
-apt install unzip -y
-apt-get install vsftpd -y
-apt install netcat-traditional
-apt install ftp -y
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 10.80.0.0/16
-echo nameserver 192.168.122.1 > /etc/resolv.conf
-```
-
-```
-CLIENT:
-apt update && apt install iptables -y
-apt install unzip -y
-apt-get install vsftpd -y
-apt install netcat-traditional -y
-apt install ftp -y
-echo nameserver 192.168.122.1 > /etc/resolv.conf
-```
-
-```
-CONNECT TELNET:
-telnet 10.15.43.32 {port router / client}
-```
-
-# Laporan Resmi Praktikum Jarkom 
-## Walkthrough Pengerjaan Praktikum Jarkom Modul 1
-
 ## Anggota Kelompok
 | No | Nama                       | NRP         |
 |----|----------------------------|-------------|
 | 1  | Aditya Reza Daffansyah     | 5027241034  |
 | 2  | I Gede Bagus Saka Sinatrya |	5027241088  |
 
+# Laporan Resmi Praktikum Jarkom 
+## Walkthrough Pengerjaan Praktikum Jarkom Modul 1
 
 ### Soal 1
-#### Untuk mempersiapkan pembuatan entitas selain mereka, Eru yang berperan sebagai Router membuat dua Switch/Gateway. Dimana Switch 1 akan menuju ke dua Ainur yaitu Melkor dan Manwe. Sedangkan Switch 2 akan menuju ke dua Ainur lainnya yaitu Varda dan Ulmo. Keempat Ainur tersebut diberi perintah oleh Eru untuk menjadi Client.
-##### Jawaban:
 - Buat `NAT1`, `Eru (router)`, `1 switch` ke `client Melkor` dan `Manwe`, `1 switch` ke `Varda` dan `Ulmo`. 
-- Hubungkan 'Eru' ke 'NAT1', 'Eru' ke 'Switch 1' dan 2. Hubungkan 'Switch 1' ke 'Melkor' dan 'Manwe', dan hubungkan 'Switch 2' ke 'Varda' dan 'Ulmo'
+- Hubungkan `Eru` ke `NAT1`, `Eru` ke `Switch1` dan `Switch2`. Hubungkan `Switch1` ke `Melkor` dan `Manwe`, dan hubungkan `Switch2` ke `Varda` dan `Ulmo`.
 
 ![topologi jarkom](assets/Topologi_Jarkom1.png)
 
 
 ### Soal 2
-- Sambungkan Eru (Router) ke NAT1 dengan network configure dibawah.
+- Sambungkan `Eru (Router)` ke `NAT1` dengan network configure dibawah.
 ```
 auto eth0
 iface eth0 inet dhcp
@@ -55,7 +25,8 @@ iface eth0 inet dhcp
 - Gunakan `iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 10.80.0.0/16` untuk menghubungkan router ke internet.
 
 ### Soal 3
-hubungkan client satu sama lain (congfig satu persatu)
+- Hubungkan client satu sama lain (config satu persatu).
+```
 Eru:
 auto eth1
 iface eth1 inet static
@@ -66,86 +37,123 @@ auto eth2
 iface eth2 inet static
     address 10.80.2.1
     netmask 255.255.255.0
+```
 
+```
 Melkor:
 auto eth0
 iface eth0 inet static
     address 10.80.1.2
     netmask 255.255.255.0
     gateway [Prefix IP].1.1
+```
 
+```
 Manwe:
 auto eth0
 iface eth0 inet static
     address 10.80.1.3
     netmask 255.255.255.0
     gateway 10.80.1.1
-
+```
+```
 Varda:
 auto eth0
 iface eth0 inet static
     address 10.80.2.2
     netmask 255.255.255.0
     gateway 10.80.2.1
-
+```
+```
 Ulmo:
 auto eth0
 iface eth0 inet static
     address 10.80.2.3
     netmask 255.255.255.0
     gateway 10.80.2.1
+```
+
+- Cek koneksi dari Melkor ke Eru:
+
+![cek koneksi](/assets/client_connected_jarkom1.png)
+
 
 ### Soal 4
-echo nameserver 192.168.122.1 > /etc/resolv.conf (KE SEMUA CLIENT)
+- Untuk menghubungkan client dengan internet, gunakan nameserver ke semua client.
 
+`echo nameserver 192.168.122.1 > /etc/resolv.conf` 
+
+- Perintah tersebut mengatur server DNS sistem ke alamat IP `192.168.122.1` dengan menimpa isi file konfigurasi `/etc/resolv.conf`.
+
+- Cek konektivitas salah satu client dengan internet:
+
+![melkor ping google](/assets/melkorpinggoogle_jarkom1.png)
 
 ### Soal 5
-masukkan config ke /root/.bashrc
+- Masukkan code dibawah ke `/root/.bashrc` untuk melakukan otomisasi konfigurasi
+
+```
 ERU:
 apt update && apt install -y iptables
-apt-get install vsftpd -y
-apt install netcat-traditional
-apt install ftp -y
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 192.216.0.0/16
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 10.80.0.0/16
 echo nameserver 192.168.122.1 > /etc/resolv.conf
+```
 
+```
 CLIENT:
-apt-get install vsftpd -y
-apt install netcat-traditional
-apt install ftp -y
 echo nameserver 192.168.122.1 > /etc/resolv.conf
+```
 
+- Contoh isi dalam `/root/.bashrc` di terminal `Eru`:
+![bashrc eru](/assets/bashrc_eru_jarkom1.png)
 
 ### Soal 6
- download file zip dari MANWE : wget --no-check-certificate "https://drive.google.com/uc?export=download&id=1bE3kF1Nclw0VyKq4bL2VtOOt53IC7lG5" -O traffic.zip
-unzip: unzip traffic.zip
+- Download dan unzip file zip di console `Manwe`:
+ ```
+ wget --no-check-certificate "https://drive.google.com/uc?export=download&id=1bE3kF1Nclw0VyKq4bL2VtOOt53IC7lG5" -O traffic.zip
+ unzip traffic.zip
+ ```
 
-masuk ke dns3 app, capture manwe -> switch1 (make sure wireshark nya jalan). 
+- Masuk ke `GNS3 App`, capture traffic `Manwe` dengan `Switch1`.
+![capture no 6](/assets/capture_no6_jarkom1.png)
 
-run traffic.sh di manwe, tunggu sampai proses selesai, stop wireshark, save capture, stop capture di GNS3
+- Jalankan `.traffic.sh` di `Manwe`, tunggu sampai proses selesai. jangan lupa tambahkan izin eksekusi dengan `chmod`
+
+- Stop `wireshark`, save capture, stop capture di GNS3, 
+![run traffic](/assets/run_traffic_jarkom1.png)
+
+Hasil wireshark:
+![wiresahrk 6](/assets/6_wireshark_jarkom1.png)
 
 ### Soal 7
-Jalan di Eru:
+- Download package server `ftp` dan `vsftpd`
+```
+Eru
 apt install ftp -y
 apt-get install vsftpd -y
+```
 
-Buat folder ftp, buat user ainur dan melkor:
+- Buat folder `ftp` dan buat user `ainur` dan `melkor` di console `Eru`:
+```
 mkdir -p /srv/ftp/shared
 adduser ainur   
 adduser melkor
+```
 
-Set folder yang akan di akses oleh ainur dan melkor
+- Set folder yang akan di akses oleh `ainur` dan `melkor`
+```
 usermod -d /srv/ftp/shared ainur 
 usermod -d /srv/ftp/shared melkor
+```
 
-Memberi akses owner ke ainur pada direktori /srv/ftp/shared
-chown ainur:ainur /srv/ftp/shared
+- Beri akses owner ke `ainur` pada direktori `/srv/ftp/shared` dengan:
+`chown ainur:ainur /srv/ftp/shared`
 
-Memberi batasan akses ke tiga jenis user pada direktori /srv/ftp/shared
-Owner: read write execute. Group: 0. Others: 0
-chmod 700 /srv/ftp/shared
+- Beri batasan akses ke tiga jenis user pada direktori `/srv/ftp/shared.` Owner: read write execute. Group: 0. Others: 0:
+`chmod 700 /srv/ftp/shared`
 
-Edit vsftpd.conf sesuai kriteria dibawah:
+- Edit `vsftpd.conf` sesuai kriteria dibawah:
+```
 nano /etc/vsftpd.conf
 
 listen=YES
@@ -155,64 +163,86 @@ local_enable=YES
 write_enable=YES
 chroot_local_user=YES
 allow_writeable_chroot=YES
+```
 
-Buat file untuk testing di local Eru
-echo "akulelahjarkom" > testlocal.txt
+- Buat file untuk testing di local `Melkor`
 
-Jalankan service vsftpd dan ftp ke localhost (10.80.1.1). whenever make changes -> do service vsftpd restart
-service vsftpd start
-ftp 10.80.1.1
-login sebagai ainur
+`echo "akulelahjarkom" > testlocal.txt`
 
-Buat file testing di ftp server
-echo "akulelahjarkom" > testftp.txt
+- Jalankan `service vsftpd start` di console `Eru` 
+- Download `apt install inetutils-ftp -y` di console Melkor
+- Jalankan `ftp 10.80.1.1` (IP Eru). Login sebagai `ainur` pada console `Melkor`
 
-Tes put and get eru (read write)
-put testftp.txt
-get testlocal.txt
+- Tes `put` pada user `ainur`.
+```
+put testlocal.txt
+```
+- Hasil tes pada user Ainur:
+![ainur can](/assets/ainur_can_jarkom1.png)
 
-Tes user melkor
-bye
-service vsftpd start
-ftp 10.80.1.1
-login sebagai ainur
+- Lakukan test yang sama pada user `Melkor`. Seharusnya `Melkor` tidak dapat mengakses ke `/srv/ftp/shared`, karena tidak memiliki akses ke direktori tersebut
 
-seharusnya tidak bisa akses ke direktori /srv/ftp/shared karena melkor tidak memiliki hak akses ke direktori tersebut
-
-bye
-service vsftpd stop
+- Hasil tes pada user Melkor:
+![melkor cant](/assets/melkor_cant_jarkom1.png)
 
 ### Soal 8
-di ulmo:
-apt install ftp -y
-apt install vsftpd -y
+```
+Ulmo:
+apt install ftp
+apt intsall inetutils-ftp -y
+```
 
-capture wireshark di ulmo -> switch 2
+- Mulai capture wireshark dari `GNS3 app` antara `Ulmo` dan `Switch2`
 
+- Download dan unzip zip yang ada (berisi cuaca.txt dan mendung.jpg)
+```
 wget --no-check-certificate "https://drive.google.com/uc?export=download&id=11ra_yTV_adsPIXeIPMSt0vrxCBZu0r33" -O ramalan_cuaca
-unzip ramalan_cuaca
-ramalan cuaca contains: mendung.jpg dan cuaca.txt
+unzip ramalan_cuaca.zip
+```
 
-di eru: 
+- Jalankan `vsftpd` di console `Eru`
+```
+Eru: 
 service vsftpd start
-+
-di ulmo:
+```
+- Jalankan ftp, login sebagai ainur, `put` cuaca dan mendung
+```
+Ulmo:
 ftp 10.80.2.1
 login as ainur
 binary
 put cuaca.txt
 put mendung.jpg
+```
+![succes put](/assets/cuaca_mendung_sent_jarkom1.png)
 
-di eru: cek ls apakah cuaca dan mendung ada
+- Cek dengan `ls` apakah cuaca dan mendung ada
+```
+Eru: 
+ls -l /srv/ftp/shared
+```
+
+![succes sent](/assets/cuaca_mendung_success.png)
+
+- Terapkan filter `ftp || ftp-data` pada `Wireshark` untuk melakukan analisis
+
+![ws no 8](/assets/wiresharkno8_jarkom1.png)
 
 
 ### Soal 9
-di Eru:
-wget -P /srv/ftp/shared "https://drive.google.com/uc?export=download&id=11ua2KgBu3MnHEIjhBnzqqv2RMEiJsILY"
-unzip 
+```
+Manwe:
+apt install ftp
+apt intsall inetutils-ftp -y
+```
+- Download dan unzip kitab dari gdrive:
+```
+Eru:
+wget "https://drive.google.com/uc?export=download&id=11ua2KgBu3MnHEIjhBnzqqv2RMEiJsILY" -O /srv/ftp/shared/kitab_penciptaan.zip
+```
 
- 
-Edit vsftpd.conf sesuai kriteria dibawah:
+- Edit `vsftpd.conf` agar membatasi user untuk read only:
+```
 nano /etc/vsftpd.conf
 
 listen=YES
@@ -222,71 +252,119 @@ local_enable=YES
 write_enable=NO
 chroot_local_user=YES
 allow_writeable_chroot=YES
+```
 
-capture wireshark di manwe -> switch 
+- Buka `GNS3 app`, capture `Wireshark` di `Manwe` -> `Switch1`
+
+```
+Eru:
 service vsftpd start
-
-di Manwe:
+```
+- Lakukan pengecekan untuk download dan delete file sebagai `ainur` 
+```
+Manwe:
 ftp 10.80.1.1
 login as ainur
-get kitab_penciptaan.zip (atau setelah di ekstrak)
-delete kitab_penciptaan.zip (HARUSYA GABISA)
+get kitab_penciptaan.zip
+delete kitab_penciptaan.zip
+```
+![getdel kitab](/assets/getdel_kitab_jarkom1.png)
 
-stop wireshark capture, cek dengan filter ftp || ftp-data
+- Stop wireshark capture, cek dengan filter `ftp || ftp-data`
+
+![ws no 9](/assets/wiresharkno9_jarkom1.png)
 
 
 ### Soal 10
-di Melkor:
-ping -c 100 10.80.1.1 (IP ERU)
-Identifikasi hasilnya
+- Lakukan ping sebanyak sebanyak 100 kali pada `Eru`
+```
+Melkor:
+ping -c 100 10.80.1.1
+```
+- Hasil:
+![pingbrut](/assets/pingbrutal_jarkom1.png)
 
 ### Soal 11
-di Melkor:
+- Download telnet, tambahkan 1 user baru, dan jalankan 
+```
+Melkor:
 apt install openbsd-inetd telnetd -y
-adduser jarkomasix:jarkomasix
+adduser jarkomasix
+```
+- Lakukan setup pada telnetd dan inetd
+```
+Melkor:
+nano /etc/inetd.conf
+// Hilangkan comment pada baris yang mengandung telnet
 
-di GNS3: start capture wire eru dan melkor (switch1)
+service openbsd-inetd start
+```
+- Buka `GNS3`, start capture wire `Eru` dan `Melkor (Switch1)`
 
-di Eru: telnet <ip>
+```
+Eru: 
+apt install telnetd -y
+telnet 10.80.1.2
+login as jarkomasix
+```
 
-stop wireshark, pake filter telnet, klik kanan pada salah satu target, klik follow > tcp stream (akan menampilkan convo eru dan 
-melkor tanpa enkripsim, akan ditermukan usn dan huruf tanpa enkripsi)
+- Stop `Wireshark`, gunakan filter `telnet`, klik kanan pada salah satu target. Klik `follow` > `tcp stream`.
+
+![securent](/assets/telnet_securent_jarkom1.png)
+
+- `Telnet` berhasil dipakai `Eru` untuk login ke `Melkor`, tapi username dan password terkirim tanpa `enkripsi` (`plaintext`) sehingga bisa langsung terbaca di `Wireshark`. Itu membuktikan protokol Telnet tidak aman untuk autentikasi maupun komunikasi.
 
 
 ### Soal 12
-di Melkor:
+- Download `netcat` untuk melakukan scanning port
+```
+Eru:
 apt install netcat-openbsd -y
-
-service vsftpd start
-
-3 port yang perlu di cek 21,80,dan 666
-nc -vz 10.80.1.2 21
-
 apt install apache2 -y
+```
+- Jalankan vsftpd di console `Melkor`
+```
+Melkor:
+service vsftpd start
 service apache2 start
-
+```
+- Port yang perlu di cek adalah port 32, 80, dan 666
+``` 
+nc -vz 10.80.1.2 21
 nc -vz 10.80.1.2 80
 nc -vz 10.80.1.2 666
+```
 
-jelaskan service port tersebut apaa dan terbuka atau tertutup
+- Hasil:
+![nc_modul](/assets/nc_jarkom1.png)
 
+- Port 21 (FTP) dan port 80 (HTTP) pada Melkor terbuka karena servicenya aktif, sedangkan port 666 tertutup karena tidak ada service yang berjalan di sana.
 
 ### Soal 13
-di Eru:
-apt update && apt install openssh-server -y
-systemctl start ssh
+- Download `media server ssh` dan nyalakan `ssh` nya
+```
+Eru:
+apt install openssh-server -y
+service start ssh
+```
 
-varda -> switch, start capturing wireshark
-
-di Varda: 
-ssh <usn>@<IP_server>
-ssh ainur@IP_ERU
-
-di Wireshark:
-hentikan capture, pakai filter ssh, klik kanan pada salah satu paket, follow, tcp stream
+- Pergi ke `GNS3 app`, capture node `Varda` dan `Switch2`
 
 
-### 14. Setelah gagal mengakses FTP, Melkor melancarkan serangan brute force terhadap  Manwe. Analisis file capture yang disediakan dan identifikasi upaya brute force Melkor. (link file) nc 10.15.43.32 3401
+```
+Varda:
+ssh ainur@10.80.1.1
+```
+
+- Hentikan capture `Wireshark`, pakai filter `ssh`, klik kanan pada salah satu paket, follow, tcp stream
+
+- Hasil: Username dan password tidak dapat dilihat pada sesi `ssh` karena komunikasi sudah terenkripsi, sehingga berbeda dengan `Telnet` yang masih plaintext. Paket yang ditangkap di `Wireshark` menunjukkan data acak sebagai bukti enkripsi.
+
+![wireshark no 13](/assets/wiresharkno13_jarkom1.png)
+
+
+
+### Soal 14. Setelah gagal mengakses FTP, Melkor melancarkan serangan brute force terhadap  Manwe. Analisis file capture yang disediakan dan identifikasi upaya brute force Melkor. (link file) nc 10.15.43.32 3401
 
 <img width="1852" height="883" alt="Image" src="https://github.com/user-attachments/assets/3b594dbe-9aba-4e1c-8e8a-ba8ef913b458" />
 
@@ -296,7 +374,7 @@ hentikan capture, pakai filter ssh, klik kanan pada salah satu paket, follow, tc
 
 <img width="1927" height="649" alt="Image" src="https://github.com/user-attachments/assets/4d14ce49-9476-4be9-bf4d-ee429eef1303" />
 
-### 15. Melkor menyusup ke ruang server dan memasang keyboard USB berbahaya pada node Manwe. Buka file capture dan identifikasi pesan atau ketikan (keystrokes) yang berhasil dicuri oleh Melkor untuk menemukan password rahasia. (link file) nc 10.15.43.32 3402
+### Soal 15. Melkor menyusup ke ruang server dan memasang keyboard USB berbahaya pada node Manwe. Buka file capture dan identifikasi pesan atau ketikan (keystrokes) yang berhasil dicuri oleh Melkor untuk menemukan password rahasia. (link file) nc 10.15.43.32 3402
 
 <img width="1853" height="723" alt="Image" src="https://github.com/user-attachments/assets/7988787b-f9c3-4963-b674-ec1ab053256d" />
 
@@ -304,7 +382,7 @@ hentikan capture, pakai filter ssh, klik kanan pada salah satu paket, follow, tc
 
 <img width="1336" height="182" alt="Image" src="https://github.com/user-attachments/assets/3f86ec50-710b-4931-af9a-91edec715e1a" />
 
-### 16. Melkor semakin murka ia meletakkan file berbahaya di server milik Manwe. Dari file capture yang ada, identifikasi file apa yang diletakkan oleh Melkor. (link file) nc 10.15.43.32 3403
+### Soal 16. Melkor semakin murka ia meletakkan file berbahaya di server milik Manwe. Dari file capture yang ada, identifikasi file apa yang diletakkan oleh Melkor. (link file) nc 10.15.43.32 3403
 
 <img width="2879" height="1334" alt="Image" src="https://github.com/user-attachments/assets/f8e2568e-b700-4f7f-9504-156c8e065da9" />
 
@@ -326,7 +404,7 @@ hentikan capture, pakai filter ssh, klik kanan pada salah satu paket, follow, tc
 
 <img width="2879" height="1495" alt="Image" src="https://github.com/user-attachments/assets/663f6de3-9984-4877-934f-ad972daca956" />
 
-### 17. Manwe membuat halaman web di node-nya yang menampilkan gambar cincin agung. Melkor yang melihat web tersebut merasa iri sehingga ia meletakkan file berbahaya agar web tersebut dapat dianggap menyebarkan malware oleh Eru. Analisis file capture untuk menggagalkan rencana Melkor dan menyelamatkan web Manwe. (link file) nc 10.15.43.32 3404
+### Soal 17. Manwe membuat halaman web di node-nya yang menampilkan gambar cincin agung. Melkor yang melihat web tersebut merasa iri sehingga ia meletakkan file berbahaya agar web tersebut dapat dianggap menyebarkan malware oleh Eru. Analisis file capture untuk menggagalkan rencana Melkor dan menyelamatkan web Manwe. (link file) nc 10.15.43.32 3404
 
 <img width="1884" height="617" alt="Image" src="https://github.com/user-attachments/assets/01d051f5-71e0-4f61-9eca-dffe65a95114" />
 
@@ -340,7 +418,7 @@ hentikan capture, pakai filter ssh, klik kanan pada salah satu paket, follow, tc
 
 ![Image](https://github.com/user-attachments/assets/10ab3949-6383-4542-a66c-68b0f19a507f)
 
-### 18. Karena rencana Melkor yang terus gagal, ia akhirnya berhenti sejenak untuk berpikir. Pada saat berpikir ia akhirnya memutuskan untuk membuat rencana jahat lainnya dengan meletakkan file berbahaya lagi tetapi dengan metode yang berbeda. Gagalkan lagi rencana Melkor dengan mengidentifikasi file capture yang disediakan agar dunia tetap aman. (link file) nc 10.15.43.32 3405
+### Soal 18. Karena rencana Melkor yang terus gagal, ia akhirnya berhenti sejenak untuk berpikir. Pada saat berpikir ia akhirnya memutuskan untuk membuat rencana jahat lainnya dengan meletakkan file berbahaya lagi tetapi dengan metode yang berbeda. Gagalkan lagi rencana Melkor dengan mengidentifikasi file capture yang disediakan agar dunia tetap aman. (link file) nc 10.15.43.32 3405
 
 <img width="2059" height="1043" alt="Image" src="https://github.com/user-attachments/assets/ffb2a43a-c07e-4619-bac9-1628f8eefce2" />
 
@@ -348,7 +426,7 @@ hentikan capture, pakai filter ssh, klik kanan pada salah satu paket, follow, tc
 
 ![Image](https://github.com/user-attachments/assets/c6cc6b64-5f8e-492a-9efe-12d7b2923612)
 
-### 19. Manwe mengirimkan email berisi surat cinta kepada Varda melalui koneksi yang tidak terenkripsi. Melihat hal itu Melkor sipaling jahat langsung melancarkan 
+### Soal 19. Manwe mengirimkan email berisi surat cinta kepada Varda melalui koneksi yang tidak terenkripsi. Melihat hal itu Melkor sipaling jahat langsung melancarkan 
 aksinya yaitu meneror Varda dengan email yang disamarkan. Analisis file capture jaringan dan gagalkan lagi rencana busuk Melkor.  (link file) nc 10.15.43.32 3406
 
 <img width="1892" height="662" alt="Image" src="https://github.com/user-attachments/assets/5871d3cd-55cd-4f44-a5a3-544d8746a0f3" />
@@ -359,7 +437,7 @@ aksinya yaitu meneror Varda dengan email yang disamarkan. Analisis file capture 
 
 <img width="1868" height="1349" alt="Image" src="https://github.com/user-attachments/assets/4e908f24-67d9-437f-8109-24be8884202e" />
 
-### 20. Untuk yang terakhir kalinya, rencana besar Melkor yaitu menanamkan sebuah file berbahaya kemudian menyembunyikannya agar tidak terlihat oleh Eru. Tetapi Manwe yang sudah merasakan adanya niat jahat dari Melkor, ia menyisipkan bantuan untuk mengungkapkan rencana Melkor. Analisis file capture dan identifikasi kegunaan bantuan yang diberikan oleh Manwe untuk menggagalkan rencana jahat Melkor selamanya. (link file) nc 10.15.43.32 3407
+### Soal 20. Untuk yang terakhir kalinya, rencana besar Melkor yaitu menanamkan sebuah file berbahaya kemudian menyembunyikannya agar tidak terlihat oleh Eru. Tetapi Manwe yang sudah merasakan adanya niat jahat dari Melkor, ia menyisipkan bantuan untuk mengungkapkan rencana Melkor. Analisis file capture dan identifikasi kegunaan bantuan yang diberikan oleh Manwe untuk menggagalkan rencana jahat Melkor selamanya. (link file) nc 10.15.43.32 3407
 
 <img width="1861" height="746" alt="Image" src="https://github.com/user-attachments/assets/6263e7d2-d3df-421d-a59d-491b656bcd37" />
 

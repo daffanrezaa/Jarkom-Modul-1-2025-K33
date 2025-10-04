@@ -1,18 +1,12 @@
 # di Melkor
 apt-get install -y openbsd-inetd telnetd
+adduser jarkomasix
+
+# hilangkan comment telnet
 nano /etc/inetd.conf
-
-# jalankan wireshark capture 
-telnet stream tcp nowait root /usr/sbin/tcpd /usr/sbin/telnetd
-
-service openbsd-inetd restart
-
-# tambahkan user dan ganti passwd
-useradd -m -s /bin/bash melkor
-echo "melkor:melkor" | chpasswd
-
+service openbsd-inetd start
+# capture wireshark
 # di Eru
+apt install telnetd -y
 telnet 10.80.1.2
-
-# login sesuai user yang dibuat pada melkor
-# stop wireshark cek usn dan passwd
+#login as jarkomasix

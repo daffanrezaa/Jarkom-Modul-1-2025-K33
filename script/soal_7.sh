@@ -29,27 +29,24 @@ write_enable=YES
 chroot_local_user=YES
 allow_writeable_chroot=YES
 
-# Buat file untuk testing di local Eru
+# Buat file untuk testing di local melkor
 echo "akulelahjarkom" > testlocal.txt
 
 # Jalankan service vsftpd dan ftp ke localhost (10.80.1.1). whenever make changes -> do service vsftpd restart
 service vsftpd start
+
+# di Melkor
 ftp 10.80.1.1
 # login sebagai ainur
 
-# Buat file testing di ftp server
-echo "akulelahjarkom" > testftp.txt
-
 # Tes put and get eru (read write)
-put testftp.txt
-get testlocal.txt
+put testlocal.txt
 
 # Tes user melkor
 bye
 service vsftpd start
-ftp 10.80.1.1
-# login sebagai ainur
-# seharusnya tidak bisa akses ke direktori /srv/ftp/shared karena melkor tidak memiliki hak akses ke direktori tersebut
 
-bye
-service vsftpd stop
+# Melkor
+ftp 10.80.1.1
+# login sebagai Melkor
+# seharusnya tidak bisa akses ke direktori /srv/ftp/shared karena melkor tidak memiliki hak akses ke direktori tersebut

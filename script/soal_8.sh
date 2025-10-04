@@ -1,6 +1,7 @@
 # di ulmo:
 apt install ftp -y
 apt install vsftpd -y
+apt install inetutils-ftp -y
 
 # capture wireshark di ulmo -> switch 2
 
@@ -15,7 +16,9 @@ service vsftpd start
 ftp 10.80.2.1
 
 # login as ainur
+binary
 put cuaca.txt
 put mendung.jpg
 
 # di eru: cek ls apakah cuaca dan mendung ada
+ls -l /srv/ftp/shared
