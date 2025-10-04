@@ -400,25 +400,39 @@ Kemudian kita dapat menjalankan langsung script di atas dan mendapatkan hasil ba
 
 ### 16. Melkor semakin murka ia meletakkan file berbahaya di server milik Manwe. Dari file capture yang ada, identifikasi file apa yang diletakkan oleh Melkor. (link file) nc 10.15.43.32 3403
 
+Berikut adalah flag yang didapatkan untuk soal nomor 16
 <img width="2879" height="1334" alt="Image" src="https://github.com/user-attachments/assets/f8e2568e-b700-4f7f-9504-156c8e065da9" />
 
-<img width="1899" height="546" alt="Image" src="https://github.com/user-attachments/assets/f32f9a8c-8ffd-451e-8438-518a4f6fe6b7" />
-
+Untuk pertanyaan pertama, sama seperti soal soal sebelumnya di sini saya mencoba terlebih dahulu menggunakan filter `tcp contains "succesfull"` untuk mencari informasi terkait login yang berhasil, dan di bawah ini adalah beberapa packet yang dihasilkan dari filter di atas.
 <img width="2879" height="1561" alt="Image" src="https://github.com/user-attachments/assets/9c666e82-bb99-459e-a625-79d1b99adaf6" />
 
-<img width="2871" height="1673" alt="Image" src="https://github.com/user-attachments/assets/17f19a1f-3f39-4dec-b316-e2437ea8feb6" />
+Kemudian saya melakukan `follow tcp stream` pada packet pertama dan langsung mendapatkan jawaban untuk pertanyaan pertama.
+<img width="1899" height="546" alt="Image" src="https://github.com/user-attachments/assets/f32f9a8c-8ffd-451e-8438-518a4f6fe6b7" />
 
-<img width="2874" height="1138" alt="Image" src="https://github.com/user-attachments/assets/1edfdcff-5d06-4ec7-85e2-bd22f66f709b" />
+Untuk pertanyaan nomor dua, di sini saya menggunakan display filter `frame contains "MZ"` untuk mendeteksi lalu lintas jaringan yang membawa file executable Windows (.exe/.dll), karena “MZ” adalah signature khas dari format tersebut. Dan seperti yang dilihat gambar di bawah ini adalah packet packet yang berisi MZ tersebut, saya kemudian lebih fokus pada file file yang terdapat file `.exe`. Pada packet nomor 254 di bagian layar kanan bawah terdapat kata kata yang mencurigakan maka dari itu file tersebut kemungkinan besar berisi malware, jadi saya fokus menghitung jumlah file yang berisi kata kata tersebut. Setelah menganalsa semua packet yang berisi kata kata tersebut saya menemukan lima packet, yaitu pada packet nomor 254, 1124, 1308, 2458, dan 2656.
+<img width="2879" height="1495" alt="Image" src="https://github.com/user-attachments/assets/663f6de3-9984-4877-934f-ad972daca956" />
 
-<img width="2878" height="1169" alt="Image" src="https://github.com/user-attachments/assets/46cdef9b-e6a7-4ef0-8ef8-e71700e81f49" />
-
-<img width="2863" height="1145" alt="Image" src="https://github.com/user-attachments/assets/eafd5946-e5d0-4695-84c1-bbe46dfff025" />
-
-<img width="2870" height="1506" alt="Image" src="https://github.com/user-attachments/assets/643a598c-638f-4e01-a154-b7d1f9a87eed" />
-
+Kemudian untuk pertanyaan nomor dua kita dapat melakukan filter dulu menggunakan `ftp-data` untuk memfilter seluruh packet yang menggunakan protokol tersebut, protokol inilah yang biasanya digunakan untuk mentransfer data/file pada sistem FTP (File Transfer Protocol). Nah di bawah ini adalah hasil filter dan packet yang paling atas merupakan file `q.exe` pertama.
 <img width="2879" height="1150" alt="Image" src="https://github.com/user-attachments/assets/a40760fb-cf12-4e15-bdee-54f8e06e1f88" />
 
-<img width="2879" height="1495" alt="Image" src="https://github.com/user-attachments/assets/663f6de3-9984-4877-934f-ad972daca956" />
+Kemudian karena yang diminta adalah file hash dalam format sha256, maka kita dapat melakukan `follow tcp stream` terlebih dahulu kemudian pada bagian bawah rubah format ASCII tersebut ke format RAW, karena sha256 menghitung hash berdasarkan nilai byte dari data, bukan berdasarkan makna teks atau tampilannya. Setelah itu kita bisa save file tersebut ke linux dan kemudian menggunakan `sha256sum` untuk melakukan hash.
+<img width="2015" height="1680" alt="Image" src="https://github.com/user-attachments/assets/2402aefd-a4bb-4ac1-95f2-e304639d33bf" />
+
+Berikut hasil dari hash menggunakan linux.
+<img width="1512" height="134" alt="Image" src="https://github.com/user-attachments/assets/3add5e77-08f1-4276-927d-02d93cf7b0fd" />
+
+Untuk pertanyaan keempat kita hanya perlu melakukan hal yang sama yaitu mencari urutan kedua pada file w.exe dan melakukan langkah yang sama untuk melakukan hash seperti q.exe.
+<img width="2874" height="1138" alt="Image" src="https://github.com/user-attachments/assets/1edfdcff-5d06-4ec7-85e2-bd22f66f709b" />
+
+Untuk pertanyaan kelima kita hanya perlu melakukan hal yang sama yaitu mencari urutan kedua pada file e.exe dan melakukan langkah yang sama untuk melakukan hash seperti sebelumnya
+<img width="2863" height="1145" alt="Image" src="https://github.com/user-attachments/assets/eafd5946-e5d0-4695-84c1-bbe46dfff025" />
+
+Untuk pertanyaan keenam kita hanya perlu melakukan hal yang sama yaitu mencari urutan kedua pada file r.exe dan melakukan langkah yang sama untuk melakukan hash seperti sebelumnya
+<img width="2878" height="1169" alt="Image" src="https://github.com/user-attachments/assets/46cdef9b-e6a7-4ef0-8ef8-e71700e81f49" />
+
+Untuk pertanyaan ket kitujuh kita hanya perlu melakukan hal yang sama yaitu mencari urutan kedua pada file t.exe dan melakukan langkah yang sama untuk melakukan hash seperti sebelumnya
+<img width="2870" height="1506" alt="Image" src="https://github.com/user-attachments/assets/643a598c-638f-4e01-a154-b7d1f9a87eed" />
+
 
 ### 17. Manwe membuat halaman web di node-nya yang menampilkan gambar cincin agung. Melkor yang melihat web tersebut merasa iri sehingga ia meletakkan file berbahaya agar web tersebut dapat dianggap menyebarkan malware oleh Eru. Analisis file capture untuk menggagalkan rencana Melkor dan menyelamatkan web Manwe. (link file) nc 10.15.43.32 3404
 
@@ -464,14 +478,19 @@ Dan masih dari packet yang sama juga terlihat data data untuk menjawab pertanyaa
 
 <img width="1861" height="746" alt="Image" src="https://github.com/user-attachments/assets/6263e7d2-d3df-421d-a59d-491b656bcd37" />
 
+Untuk pertanyaan nomor satu dilihat dari protokol yang digunakan di bawah ini tedapat protokol TLS, yaitu protokol kriptografi yang menyediakan enkripsi, integritas, dan otentikasi untuk komunikasi di jaringan.
 <img width="2284" height="629" alt="Image" src="https://github.com/user-attachments/assets/1e74ee44-1d4a-475b-a824-8bd4b230c648" />
 
+Kemudian untuk pertanyaan nomor dua, saya di sini terlebih dahulu melihat export object untuk melihat apakah ada object yang bisa di export, tetapi setelah saya mengecek semua jenis protokol yang bisa di export tidak ada satupun terlihat yang bisa di export.
 <img width="1600" height="484" alt="Image" src="https://github.com/user-attachments/assets/be93835f-f087-4a3c-88ad-c9521fee51f3" />
 
+Nah seperti yang kita tahu terdapat metode enkripsi yang digunakan pada data ini yaitu TLS, jadi kemungkinan TLS ini yang mengenkripsi seluruh object yang ada. TLS bisa menggunakan kunci kriptografi untuk mengamankan seluruh sesi, membuatnya tidak dapat dibaca oleh pihak ketiga (termasuk kita yang menganalisis). Seperti yang kita tahu saat mendownload file MelkorPlan5 dan melakukan unzip terdapat file dengan nama `keyslogfile` dan setelah dibuka kemnungkinan ini adalah kunci rahasia TLS untuk membuka dan membaca objek objek tadi. Jadi untuk memasukkan kunci ini kita dapat melihat pada bagian kiri atas pada aplikasi wireshark dan menenakn `edit --> preference --> protocol --> TLS` seperti gambar di bawah ini. Kemudian kita dapa memasukkan file `keyslogfile` pada bagian paling bawah. 
 <img width="1569" height="1255" alt="Image" src="https://github.com/user-attachments/assets/4ab47cca-364b-4e16-b070-1a20ac398041" />
 
+Kemudian kita kembali lagi pada export objek dan sekarang sudah terlihat seluruh objek yang bisa di export dan kita bisa mencoba untuk mencoba memasukkan objek objek tersebut ke pertanyaan nomor dua.
 <img width="1634" height="674" alt="Image" src="https://github.com/user-attachments/assets/cfc17483-12a0-4dcd-ac8b-ebc042e3fcfe" />
 
+Setelah mengetahui file mana yang terdapat malware, untuk menjawab pertanyaan nomor tiga kita dapa mengexport objek tersebut ke linux dan melakukan hash dengan format sha256 seperti di bawah ini.
 ![Image](https://github.com/user-attachments/assets/45372944-f16d-42b7-9c58-1b55377dbf61)
 
 
